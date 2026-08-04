@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Simulasi Pembiayaan — KSPPS Amanah Mandiri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1F2E28;
+    --ink-soft:#4C5C54;
+    --primary:#0B4F45;
+    --primary-light:#146356;
+    --primary-dark:#083B34;
+    --gold:#C79A44;
+    --gold-light:#E4C98A;
+    --gold-deep:#9C7A34;
+    --paper:#FAF6EC;
+    --paper-alt:#F1EADA;
+    --card:#FFFEFB;
+    --line:#DCD2B8;
+    --danger:#9C4A3C;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:8px;
+    --shadow-soft:0 10px 30px -12px rgba(11,79,69,0.18);
+    --shadow-card:0 2px 0 rgba(11,79,69,0.05), 0 18px 40px -20px rgba(31,46,40,0.25);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,.font-display{
+    font-family:'Fraunces', serif;
+    color:var(--primary-dark);
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  a{color:inherit; text-decoration:none;}
+
+  .container{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  :focus-visible{
+    outline:2.5px solid var(--gold-deep);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  /* ---------- decorative star pattern ---------- */
+  .star-field{
+    background-image: radial-gradient(var(--gold-light) 0.6px, transparent 0.6px),
+      radial-gradient(var(--gold-light) 0.6px, transparent 0.6px);
+    background-size: 46px 46px;
+    background-position: 0 0, 23px 23px;
+  }
+
+  .rosette{
+    position:relative;
+    width:100px; height:100px;
+    flex-shrink:0;
+  }
+  .rosette::before,
+  .rosette::after{
+    content:"";
+    position:absolute;
+    inset:14px;
+    border:1.5px solid var(--gold);
+    opacity:0.9;
+  }
+  .rosette::before{ transform:rotate(0deg); }
+  .rosette::after{ transform:rotate(45deg); }
+
+  /* ---------- header ---------- */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(250,246,236,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .site-header .bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 24px;
+    gap:20px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-mark{
+    width:42px; height:42px;
+    border-radius:10px;
+    background:linear-gradient(155deg, var(--primary) 0%, var(--primary-dark) 100%);
+    position:relative;
+    flex-shrink:0;
+  }
+  .brand-mark::before,
+  .brand-mark::after{
+    content:"";
+    position:absolute;
+    inset:11px;
+    border:1.3px solid var(--gold-light);
+  }
+  .brand-mark::before{ transform:rotate(0deg); }
+  .brand-mark::after{ transform:rotate(45deg); }
+  .brand-text .name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    color:var(--primary-dark);
+    line-height:1.15;
+  }
+  .brand-text .tag{
+    font-size:10.5px;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    font-weight:600;
+  }
+  nav.primary-nav{
+    display:flex;
+    gap:28px;
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+  nav.primary-nav a{ position:relative; padding:4px 0; transition:color .2s; }
+  nav.primary-nav a:hover{ color:var(--primary); }
+  nav.primary-nav a.active{ color:var(--primary); }
+  nav.primary-nav a.active::after{
+    content:""; position:absolute; left:0; right:0; bottom:-6px; height:2px;
+    background:var(--gold);
+  }
+  .nav-cta{
+    background:var(--primary);
+    color:var(--paper);
+    padding:10px 18px;
+    border-radius:100px;
+    font-size:13.5px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .nav-toggle{ display:none; }
+
+  @media (max-width: 860px){
+    nav.primary-nav{ display:none; }
+    .nav-cta{ display:none; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:64px 0 40px;
+  }
+  .hero .container{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:40px;
+  }
+  .hero-copy{ max-width:600px; }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:16px; height:1.5px;
+    background:var(--gold-deep);
+  }
+  .hero h1{
+    font-size:clamp(30px, 4.4vw, 46px);
+    line-height:1.12;
+    font-weight:600;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--gold-deep);
+  }
+  .hero p.lead{
+    margin-top:18px;
+    font-size:16.5px;
+    line-height:1.65;
+    color:var(--ink-soft);
+    max-width:520px;
+  }
+  .hero-stats{
+    display:flex;
+    gap:32px;
+    margin-top:34px;
+  }
+  .hero-stats .stat .num{
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    color:var(--primary);
+    font-weight:600;
+  }
+  .hero-stats .stat .lbl{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .hero-art{
+    position:relative;
+    width:280px; height:280px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hero-art .ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1px solid var(--line);
+  }
+  .hero-art .ring.r2{ inset:26px; }
+  .hero-art .rosette{ width:150px; height:150px; }
+  .hero-art .rosette::before,
+  .hero-art .rosette::after{ border-color:var(--primary-light); opacity:0.6; }
+  @media (max-width: 900px){
+    .hero-art{ display:none; }
+  }
+
+  /* ---------- section titles ---------- */
+  .section-head{
+    text-align:left;
+    max-width:640px;
+    margin-bottom:36px;
+  }
+  .section-head h2{
+    font-size:clamp(24px, 3vw, 32px);
+    font-weight:600;
+  }
+  .section-head p{
+    margin-top:10px;
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1.6;
+  }
+
+  /* ---------- calculator layout ---------- */
+  .calc-section{ padding:20px 0 80px; }
+  .calc-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:28px;
+    align-items:start;
+  }
+  @media (max-width: 940px){
+    .calc-grid{ grid-template-columns:1fr; }
+  }
+
+  /* --- form card --- */
+  .form-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:34px;
+    box-shadow:var(--shadow-card);
+  }
+  .form-card .card-eyebrow{
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--primary);
+    margin-bottom:6px;
+  }
+  .form-card h3{
+    font-size:21px;
+    font-weight:600;
+    margin-bottom:26px;
+  }
+
+  .field{ margin-bottom:26px; }
+  .field label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+  .field label .hint{
+    font-weight:500;
+    color:var(--ink-soft);
+    font-size:12px;
+  }
+
+  .amount-input{
+    display:flex;
+    align-items:center;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    background:var(--paper);
+    padding:0 4px 0 14px;
+    transition:border-color .2s;
+  }
+  .amount-input:focus-within{ border-color:var(--primary); }
+  .amount-input .prefix{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    color:var(--gold-deep);
+    font-weight:600;
+    margin-right:8px;
+  }
+  .amount-input input{
+    border:none;
+    background:transparent;
+    outline:none;
+    font-family:'JetBrains Mono', monospace;
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink);
+    padding:13px 6px;
+    width:100%;
+    min-width:0;
+  }
+  .amount-input .suffix{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    padding-right:10px;
+    white-space:nowrap;
+  }
+
+  input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:5px;
+    border-radius:4px;
+    background:linear-gradient(to right, var(--primary) 0%, var(--primary) var(--fill,50%), var(--line) var(--fill,50%), var(--line) 100%);
+    margin-top:14px;
+    cursor:pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:var(--card);
+    border:3px solid var(--primary);
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(11,79,69,0.3);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:18px; height:18px;
+    border-radius:50%;
+    background:var(--card);
+    border:3px solid var(--primary);
+    cursor:pointer;
+  }
+  input[type="range"]::-moz-range-track{
+    height:5px; border-radius:4px; background:var(--line);
+  }
+
+  .scale-labels{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  .method-pills{
+    display:flex;
+    gap:8px;
+    background:var(--paper-alt);
+    padding:5px;
+    border-radius:100px;
+  }
+  .method-pills button{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding:10px 12px;
+    border-radius:100px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .method-pills button.active{
+    background:var(--primary);
+    color:var(--paper);
+    box-shadow:0 4px 10px -4px rgba(11,79,69,0.5);
+  }
+
+  .submit-btn{
+    width:100%;
+    background:var(--gold-deep);
+    color:var(--paper);
+    border:none;
+    padding:16px;
+    border-radius:var(--radius-sm);
+    font-family:inherit;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    margin-top:6px;
+    transition:transform .15s ease, background .2s;
+  }
+  .submit-btn:hover{ background:var(--primary-dark); transform:translateY(-1px); }
+  .submit-btn:active{ transform:translateY(0); }
+
+  .form-note{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:14px;
+    line-height:1.5;
+  }
+
+  /* --- passbook result card --- */
+  .passbook-wrap{ position:sticky; top:96px; }
+  .passbook{
+    position:relative;
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);
+    padding:34px 34px 30px 40px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .passbook::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:16px;
+    background-image: radial-gradient(circle, var(--paper) 3.4px, transparent 3.6px);
+    background-size:16px 22px;
+    background-position:0 10px;
+    background-repeat:repeat-y;
+  }
+  .passbook::after{
+    content:"";
+    position:absolute;
+    left:16px; top:0; bottom:0;
+    width:1px;
+    background:repeating-linear-gradient(to bottom, var(--line) 0 6px, transparent 6px 12px);
+  }
+
+  .passbook-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px dashed var(--line);
+  }
+  .passbook-head .label{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--primary);
+    margin-bottom:4px;
+  }
+  .passbook-head h3{
+    font-size:19px; font-weight:600;
+  }
+  .stamp{
+    width:88px; height:88px;
+    border:2px dashed var(--gold);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-11deg);
+    flex-shrink:0;
+  }
+  .stamp span{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    text-align:center;
+    line-height:1.4;
+  }
+
+  .headline-figure{
+    text-align:left;
+    margin-bottom:26px;
+  }
+  .headline-figure .lbl{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .headline-figure .amount{
+    font-family:'Fraunces', serif;
+    font-size:clamp(30px, 4vw, 40px);
+    font-weight:600;
+    color:var(--primary-dark);
+    line-height:1.1;
+  }
+  .headline-figure .amount .per{
+    font-family:'Plus Jakarta Sans', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+
+  .breakdown-rows{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin-bottom:20px;
+  }
+  .brow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:13px 0;
+    border-bottom:1px dotted var(--line);
+    font-size:14px;
+  }
+  .brow:last-child{ border-bottom:none; }
+  .brow .k{ color:var(--ink-soft); }
+  .brow .v{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .brow.total .k{ color:var(--primary-dark); font-weight:700; }
+  .brow.total .v{ color:var(--primary-dark); font-weight:700; font-size:15px; }
+
+  .toggle-table-btn{
+    width:100%;
+    background:var(--paper-alt);
+    border:1px solid var(--line);
+    color:var(--primary-dark);
+    font-family:inherit;
+    font-weight:600;
+    font-size:13.5px;
+    padding:12px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:background .2s;
+  }
+  .toggle-table-btn:hover{ background:var(--line); }
+  .toggle-table-btn .chev{ transition:transform .25s; font-size:11px; }
+  .toggle-table-btn.open .chev{ transform:rotate(180deg); }
+
+  .empty-state{
+    text-align:center;
+    padding:30px 10px 10px;
+    color:var(--ink-soft);
+    font-size:13.5px;
+  }
+  .empty-state .rosette{
+    width:56px; height:56px;
+    margin:0 auto 16px;
+    opacity:0.5;
+  }
+
+  /* --- schedule table --- */
+  .schedule-wrap{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+  }
+  .schedule-wrap.open{ max-height:420px; }
+  .schedule-scroll{
+    max-height:400px;
+    overflow-y:auto;
+    margin-top:14px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+  }
+  table.schedule{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+  }
+  table.schedule thead th{
+    position:sticky; top:0;
+    background:var(--primary);
+    color:var(--paper);
+    text-align:right;
+    padding:10px 12px;
+    font-weight:600;
+    font-size:11px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+  }
+  table.schedule thead th:first-child{ text-align:left; }
+  table.schedule td{
+    padding:9px 12px;
+    text-align:right;
+    font-family:'JetBrains Mono', monospace;
+    border-bottom:1px solid var(--paper-alt);
+    color:var(--ink);
+  }
+  table.schedule td:first-child{
+    text-align:left;
+    font-family:'Plus Jakarta Sans', sans-serif;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  table.schedule tbody tr:nth-child(even){ background:var(--paper); }
+
+  /* ---------- info strip ---------- */
+  .info-strip{
+    background:var(--primary);
+    color:var(--paper);
+    padding:56px 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .info-strip::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: radial-gradient(rgba(228,201,138,0.18) 1px, transparent 1px);
+    background-size:28px 28px;
+  }
+  .info-strip .container{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:32px;
+  }
+  @media (max-width:800px){
+    .info-strip .container{ grid-template-columns:1fr; }
+  }
+  .info-card .n{
+    font-family:'Fraunces', serif;
+    font-size:15px;
+    color:var(--gold-light);
+    margin-bottom:10px;
+  }
+  .info-card h4{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    font-weight:600;
+    margin-bottom:10px;
+    color:var(--paper);
+  }
+  .info-card p{
+    font-size:14px;
+    line-height:1.65;
+    color:rgba(250,246,236,0.8);
+  }
+
+  /* ---------- disclaimer ---------- */
+  .disclaimer{
+    padding:40px 0;
+  }
+  .disclaimer .box{
+    border:1px dashed var(--gold-deep);
+    border-radius:var(--radius-md);
+    padding:20px 24px;
+    background:var(--paper-alt);
+    font-size:13px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .disclaimer .box b{ color:var(--ink); }
+  .disclaimer .icon{
+    flex-shrink:0;
+    width:26px; height:26px;
+    border-radius:50%;
+    border:1.5px solid var(--gold-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    color:var(--gold-deep);
+    font-size:14px;
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    background:var(--primary-dark);
+    color:rgba(250,246,236,0.75);
+    padding:56px 0 26px;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr;
+    gap:40px;
+    padding-bottom:36px;
+    border-bottom:1px solid rgba(250,246,236,0.12);
+  }
+  @media (max-width:800px){
+    .footer-grid{ grid-template-columns:1fr; gap:28px; }
+  }
+  .footer-brand .brand-text .name{ color:var(--paper); }
+  .footer-brand p{
+    font-size:13.5px; line-height:1.7; margin-top:14px; max-width:320px;
+    color:rgba(250,246,236,0.65);
+  }
+  footer h5{
+    font-family:'Fraunces', serif;
+    font-size:14px;
+    color:var(--gold-light);
+    margin-bottom:16px;
+    font-weight:600;
+  }
+  footer ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:11px; }
+  footer ul a{ font-size:13.5px; color:rgba(250,246,236,0.72); transition:color .2s; }
+  footer ul a:hover{ color:var(--gold-light); }
+  .footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:22px;
+    font-size:12px;
+    color:rgba(250,246,236,0.5);
+    flex-wrap:wrap;
+    gap:10px;
+  }
+
+  ::selection{ background:var(--gold-light); color:var(--primary-dark); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar container">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div class="brand-text">
+        <div class="name">Amanah Mandiri</div>
+        <div class="tag">KSPPS Syariah</div>
+      </div>
+    </div>
+    <nav class="primary-nav" aria-label="Navigasi utama">
+      <a href="index.html">Beranda</a>
+      <a href="#">Profil</a>
+      <a href="simpanan.html">Simpanan</a>
+      <a href="#">Pembiayaan</a>
+      <a href="#kalkulator" class="active">Kalkulator</a>
+      <a href="#kontak">Hubungi Kami</a>
+    </nav>
+    <a href="#kontak" class="nav-cta">Ajukan Pembiayaan</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="hero-copy">
+      <div class="eyebrow">Kalkulator Pembiayaan</div>
+      <h1>Rencanakan angsuran Anda <em>dengan amanah</em>, sebelum mengajukan.</h1>
+      <p class="lead">Simulasikan estimasi angsuran bulanan pembiayaan syariah di KSPPS Amanah Mandiri. Atur jumlah, jangka waktu, dan margin/nisbah untuk melihat gambaran kewajiban Anda per bulan.</p>
+      <div class="hero-stats">
+        <div class="stat">
+          <div class="num">3–60</div>
+          <div class="lbl">Bulan jangka waktu</div>
+        </div>
+        <div class="stat">
+          <div class="num">Flat</div>
+          <div class="lbl">&amp; Anuitas tersedia</div>
+        </div>
+        <div class="stat">
+          <div class="num">100%</div>
+          <div class="lbl">Estimasi, tanpa akad</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="ring"></div>
+      <div class="ring r2"></div>
+      <div class="rosette"></div>
+    </div>
+  </div>
+</section>
+
+<section class="calc-section" id="kalkulator">
+  <div class="container">
+    <div class="section-head">
+      <h2>Simulasi Angsuran Pembiayaan</h2>
+      <p>Geser atau ketik langsung nilai di bawah ini. Hasil akan tampil dalam bentuk buku simulasi di sisi kanan setiap kali Anda menekan tombol Hitung.</p>
+    </div>
+
+    <div class="calc-grid">
+      <!-- FORM -->
+      <div class="form-card">
+        <div class="card-eyebrow">Data Pembiayaan</div>
+        <h3>Masukkan Rincian Anda</h3>
+
+        <form id="calcForm">
+          <div class="field">
+            <label for="jumlah">Jumlah Pembiayaan <span class="hint">Rp 1.000.000 – Rp 500.000.000</span></label>
+            <div class="amount-input">
+              <span class="prefix">Rp</span>
+              <input type="text" inputmode="numeric" id="jumlahText" value="50.000.000" aria-label="Jumlah pembiayaan dalam rupiah">
+            </div>
+            <input type="range" id="jumlahRange" min="1000000" max="500000000" step="500000" value="50000000">
+            <div class="scale-labels"><span>1jt</span><span>500jt</span></div>
+          </div>
+
+          <div class="field">
+            <label for="jangkaText">Jangka Waktu <span class="hint">3 – 60 bulan</span></label>
+            <div class="amount-input">
+              <input type="text" inputmode="numeric" id="jangkaText" value="12" aria-label="Jangka waktu dalam bulan">
+              <span class="suffix">bulan</span>
+            </div>
+            <input type="range" id="jangkaRange" min="3" max="60" step="1" value="12">
+            <div class="scale-labels"><span>3 bln</span><span>60 bln</span></div>
+          </div>
+
+          <div class="field">
+            <label for="marginText">Margin / Nisbah Setara <span class="hint">per tahun</span></label>
+            <div class="amount-input">
+              <input type="text" inputmode="decimal" id="marginText" value="14" aria-label="Margin per tahun dalam persen">
+              <span class="suffix">% / tahun</span>
+            </div>
+            <input type="range" id="marginRange" min="6" max="30" step="0.5" value="14">
+            <div class="scale-labels"><span>6%</span><span>30%</span></div>
+          </div>
+
+          <div class="field">
+            <label>Metode Perhitungan</label>
+            <div class="method-pills" role="group" aria-label="Metode perhitungan">
+              <button type="button" class="active" data-method="flat">Flat (Murabahah)</button>
+              <button type="button" data-method="anuitas">Anuitas (Menurun)</button>
+            </div>
+          </div>
+
+          <button type="submit" class="submit-btn">Hitung Simulasi</button>
+          <p class="form-note">Metode flat menghitung margin tetap dari pokok awal — umum dipakai untuk akad murabahah. Metode anuitas menghitung margin dari sisa pokok berjalan, sehingga porsi margin mengecil seiring waktu.</p>
+        </form>
+      </div>
+
+      <!-- PASSBOOK RESULT -->
+      <div class="passbook-wrap">
+        <div class="passbook" id="passbook">
+          <div class="passbook-head">
+            <div>
+              <div class="label">Buku Simulasi</div>
+              <h3>Amanah Mandiri</h3>
+            </div>
+            <div class="stamp"><span>Simulasi<br>Bukan Akad</span></div>
+          </div>
+
+          <div id="resultEmpty" class="empty-state">
+            <div class="rosette"></div>
+            Isi formulir di sebelah kiri lalu tekan<br><b>“Hitung Simulasi”</b> untuk melihat rincian angsuran Anda di sini.
+          </div>
+
+          <div id="resultContent" style="display:none;">
+            <div class="headline-figure">
+              <div class="lbl">Estimasi angsuran per bulan</div>
+              <div class="amount"><span id="outAngsuran">Rp 0</span> <span class="per">/ bulan</span></div>
+            </div>
+
+            <div class="breakdown-rows">
+              <div class="brow"><span class="k">Metode</span><span class="v" id="outMetode">Flat</span></div>
+              <div class="brow"><span class="k">Jumlah pembiayaan</span><span class="v" id="outJumlah">Rp 0</span></div>
+              <div class="brow"><span class="k">Jangka waktu</span><span class="v" id="outJangka">0 bulan</span></div>
+              <div class="brow"><span class="k">Margin per tahun</span><span class="v" id="outMarginPct">0%</span></div>
+              <div class="brow"><span class="k">Estimasi pokok /bulan</span><span class="v" id="outPokokBulanan">Rp 0</span></div>
+              <div class="brow"><span class="k">Estimasi margin /bulan</span><span class="v" id="outMarginBulanan">Rp 0</span></div>
+              <div class="brow"><span class="k">Total margin dibayar</span><span class="v" id="outMarginTotal">Rp 0</span></div>
+              <div class="brow total"><span class="k">Total pengembalian</span><span class="v" id="outTotal">Rp 0</span></div>
+            </div>
+
+            <button type="button" class="toggle-table-btn" id="toggleSchedule">
+              Lihat rincian per bulan <span class="chev">▾</span>
+            </button>
+            <div class="schedule-wrap" id="scheduleWrap">
+              <div class="schedule-scroll">
+                <table class="schedule">
+                  <thead>
+                    <tr><th>Bulan</th><th>Pokok</th><th>Margin</th><th>Angsuran</th><th>Sisa Pokok</th></tr>
+                  </thead>
+                  <tbody id="scheduleBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="info-strip">
+  <div class="container">
+    <div class="info-card">
+      <div class="n">01</div>
+      <h4>Transparan sejak awal</h4>
+      <p>Simulasi menunjukkan porsi pokok dan margin secara terpisah, sehingga Anda tahu persis komponen setiap angsuran sebelum menandatangani akad.</p>
+    </div>
+    <div class="info-card">
+      <div class="n">02</div>
+      <h4>Dua metode perhitungan</h4>
+      <p>Bandingkan skema flat yang umum untuk murabahah dengan skema anuitas menurun, lalu pilih gambaran yang paling sesuai kebutuhan Anda.</p>
+    </div>
+    <div class="info-card">
+      <div class="n">03</div>
+      <h4>Konsultasi tanpa biaya</h4>
+      <p>Hasil di sini murni estimasi. Tim Amanah Mandiri siap membantu menghitung skema akad yang sebenarnya sesuai profil pembiayaan Anda.</p>
+    </div>
+  </div>
+</section>
+
+<section class="disclaimer">
+  <div class="container">
+    <div class="box">
+      <div class="icon">i</div>
+      <div>
+        <b>Catatan:</b> Nilai yang ditampilkan kalkulator ini hanya merupakan simulasi untuk membantu perencanaan Anda. Perhitungan margin/nisbah, biaya administrasi, dan skema akad yang berlaku sebenarnya ditentukan berdasarkan kesepakatan antara anggota dan KSPPS Amanah Mandiri di kantor pusat maupun kantor cabang.
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="kontak">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true"></div>
+          <div class="brand-text"><div class="name">Amanah Mandiri</div></div>
+        </div>
+        <p>Koperasi Simpan Pinjam dan Pembiayaan Syariah yang melayani simpanan, investasi, dan pembiayaan berbasis akad syariah untuk anggota dan masyarakat.</p>
+      </div>
+      <div>
+        <h5>Kantor Pusat</h5>
+        <ul>
+          <li>Jl. Merdeka Raya No. 21, Boyolali, Jawa Tengah</li>
+          <li>Telp: (0276) 321 456</li>
+          <li>Email: info@amanahmandiri.co.id</li>
+        </ul>
+      </div>
+      <div>
+        <h5>Layanan</h5>
+        <ul>
+          <li><a href="simpanan.html">Simpanan Syariah</a></li>
+          <li><a href="#">Pembiayaan Murabahah</a></li>
+          <li><a href="#kalkulator">Kalkulator Pembiayaan</a></li>
+          <li><a href="#kontak">Kantor Pelayanan</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 KSPPS Amanah Mandiri. Seluruh hak cipta dilindungi.</span>
+      <span>Situs simulasi — bukan penawaran resmi.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const jumlahText = document.getElementById('jumlahText');
+  const jumlahRange = document.getElementById('jumlahRange');
+  const jangkaText = document.getElementById('jangkaText');
+  const jangkaRange = document.getElementById('jangkaRange');
+  const marginText = document.getElementById('marginText');
+  const marginRange = document.getElementById('marginRange');
+  const methodBtns = document.querySelectorAll('.method-pills button');
+  const form = document.getElementById('calcForm');
+  const toggleBtn = document.getElementById('toggleSchedule');
+  const scheduleWrap = document.getElementById('scheduleWrap');
+  const scheduleBody = document.getElementById('scheduleBody');
+  const resultEmpty = document.getElementById('resultEmpty');
+  const resultContent = document.getElementById('resultContent');
+
+  let method = 'flat';
+
+  function fmtRupiah(n){
+    return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+  }
+  function parseNumber(str){
+    const digits = String(str).replace(/[^0-9]/g,'');
+    return digits ? parseInt(digits,10) : 0;
+  }
+  function formatWithDots(n){
+    return n.toLocaleString('id-ID');
+  }
+  function updateRangeFill(rangeEl){
+    const min = parseFloat(rangeEl.min), max = parseFloat(rangeEl.max), val = parseFloat(rangeEl.value);
+    const pct = ((val - min) / (max - min)) * 100;
+    rangeEl.style.setProperty('--fill', pct + '%');
+  }
+
+  // Jumlah sync
+  jumlahText.addEventListener('input', () => {
+    let v = parseNumber(jumlahText.value);
+    if (v > 500000000) v = 500000000;
+    jumlahText.value = formatWithDots(v);
+    jumlahRange.value = v;
+    updateRangeFill(jumlahRange);
+  });
+  jumlahRange.addEventListener('input', () => {
+    jumlahText.value = formatWithDots(parseInt(jumlahRange.value,10));
+    updateRangeFill(jumlahRange);
+  });
+
+  // Jangka sync
+  jangkaText.addEventListener('input', () => {
+    let v = parseNumber(jangkaText.value);
+    if (v > 60) v = 60;
+    jangkaText.value = v;
+    jangkaRange.value = v || 3;
+    updateRangeFill(jangkaRange);
+  });
+  jangkaRange.addEventListener('input', () => {
+    jangkaText.value = jangkaRange.value;
+    updateRangeFill(jangkaRange);
+  });
+
+  // Margin sync
+  marginText.addEventListener('input', () => {
+    let v = parseFloat(String(marginText.value).replace(',', '.').replace(/[^0-9.]/g,''));
+    if (isNaN(v)) v = 0;
+    if (v > 30) v = 30;
+    marginRange.value = v;
+    updateRangeFill(marginRange);
+  });
+  marginRange.addEventListener('input', () => {
+    marginText.value = marginRange.value;
+    updateRangeFill(marginRange);
+  });
+
+  methodBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      methodBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      method = btn.dataset.method;
+    });
+  });
+
+  toggleBtn.addEventListener('click', () => {
+    const isOpen = scheduleWrap.classList.toggle('open');
+    toggleBtn.classList.toggle('open', isOpen);
+    toggleBtn.innerHTML = isOpen
+      ? 'Sembunyikan rincian per bulan <span class="chev">▾</span>'
+      : 'Lihat rincian per bulan <span class="chev">▾</span>';
+  });
+
+  function computeFlat(pokok, bulan, ratePct){
+    const marginTotal = pokok * (ratePct/100) * (bulan/12);
+    const pokokBulanan = pokok / bulan;
+    const marginBulanan = marginTotal / bulan;
+    const angsuran = pokokBulanan + marginBulanan;
+    const rows = [];
+    let sisa = pokok;
+    for(let i=1;i<=bulan;i++){
+      sisa -= pokokBulanan;
+      rows.push({
+        bulan:i,
+        pokok:pokokBulanan,
+        margin:marginBulanan,
+        angsuran:angsuran,
+        sisa: Math.max(sisa,0)
+      });
+    }
+    return { angsuran, pokokBulanan, marginBulanan, marginTotal, totalBayar: pokok + marginTotal, rows };
+  }
+
+  function computeAnuitas(pokok, bulan, ratePct){
+    const i = (ratePct/100)/12;
+    let angsuran;
+    if(i === 0){
+      angsuran = pokok / bulan;
+    } else {
+      angsuran = pokok * i / (1 - Math.pow(1+i, -bulan));
+    }
+    const rows = [];
+    let sisa = pokok;
+    let marginTotal = 0;
+    for(let m=1;m<=bulan;m++){
+      const marginBulan = sisa * i;
+      let pokokBulan = angsuran - marginBulan;
+      if(m === bulan){ pokokBulan = sisa; angsuran = pokokBulan + marginBulan; }
+      sisa = Math.max(sisa - pokokBulan, 0);
+      marginTotal += marginBulan;
+      rows.push({ bulan:m, pokok:pokokBulan, margin:marginBulan, angsuran: pokokBulan + marginBulan, sisa });
+    }
+    const firstAngsuran = rows[0] ? rows[0].angsuran : 0;
+    const avgPokok = pokok / bulan;
+    const avgMargin = marginTotal / bulan;
+    return { angsuran: firstAngsuran, pokokBulanan: avgPokok, marginBulanan: avgMargin, marginTotal, totalBayar: pokok + marginTotal, rows };
+  }
+
+  function render(result, pokok, bulan, ratePct, methodLabel){
+    resultEmpty.style.display = 'none';
+    resultContent.style.display = 'block';
+
+    document.getElementById('outAngsuran').textContent = fmtRupiah(result.angsuran) + (method==='anuitas' ? ' *' : '');
+    document.getElementById('outMetode').textContent = methodLabel;
+    document.getElementById('outJumlah').textContent = fmtRupiah(pokok);
+    document.getElementById('outJangka').textContent = bulan + ' bulan';
+    document.getElementById('outMarginPct').textContent = ratePct + '% / tahun';
+    document.getElementById('outPokokBulanan').textContent = fmtRupiah(result.pokokBulanan) + (method==='anuitas' ? ' (rata-rata)' : '');
+    document.getElementById('outMarginBulanan').textContent = fmtRupiah(result.marginBulanan) + (method==='anuitas' ? ' (rata-rata)' : '');
+    document.getElementById('outMarginTotal').textContent = fmtRupiah(result.marginTotal);
+    document.getElementById('outTotal').textContent = fmtRupiah(result.totalBayar);
+
+    scheduleBody.innerHTML = result.rows.map(r => `
+      <tr>
+        <td>Bulan ${r.bulan}</td>
+        <td>${fmtRupiah(r.pokok)}</td>
+        <td>${fmtRupiah(r.margin)}</td>
+        <td>${fmtRupiah(r.angsuran)}</td>
+        <td>${fmtRupiah(r.sisa)}</td>
+      </tr>
+    `).join('');
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const pokok = Math.max(parseNumber(jumlahText.value), 1000000);
+    const bulan = Math.max(parseInt(jangkaText.value || '0',10), 1);
+    const ratePct = Math.max(parseFloat(String(marginText.value).replace(',', '.')) || 0, 0);
+
+    const result = method === 'flat'
+      ? computeFlat(pokok, bulan, ratePct)
+      : computeAnuitas(pokok, bulan, ratePct);
+
+    render(result, pokok, bulan, ratePct, method === 'flat' ? 'Flat (Murabahah)' : 'Anuitas (Menurun)');
+
+    document.getElementById('passbook').scrollIntoView({ behavior:'smooth', block:'nearest' });
+  });
+
+  // init fills
+  updateRangeFill(jumlahRange);
+  updateRangeFill(jangkaRange);
+  updateRangeFill(marginRange);
+})();
+</script>
+
+</body>
+</html>
