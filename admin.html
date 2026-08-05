@@ -1015,6 +1015,11 @@
   }
   .btn-danger:hover{ background:var(--danger); color:var(--paper); }
 </style>
+<!-- Firebase (penyimpanan & login admin) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -1044,22 +1049,33 @@
     <h3 style="margin-bottom:18px;">Masuk ke Panel Admin</h3>
     <form id="lockForm">
       <div class="field" style="text-align:left;">
-        <label for="passcode">Kode Akses</label>
-        <input type="password" id="passcode" class="form-input" placeholder="Masukkan kode akses admin" required>
+        <label for="adminEmail">Email Admin</label>
+        <input type="email" id="adminEmail" class="form-input" placeholder="admin@amanahmandiri.co.id" required>
+      </div>
+      <div class="field" style="text-align:left;">
+        <label for="adminPassword">Kata Sandi</label>
+        <input type="password" id="adminPassword" class="form-input" placeholder="Kata sandi" required>
       </div>
       <button type="submit" class="submit-btn">Masuk</button>
-      <p class="form-note" id="lockError" style="color:var(--danger); display:none;">Kode akses salah. Silakan coba lagi.</p>
-      <p class="form-note">Demo: kode akses default adalah <b>amanah2026</b>. Ganti mekanisme ini dengan autentikasi sungguhan sebelum dipakai secara produksi.</p>
+      <p class="form-note" id="lockError" style="color:var(--danger); display:none;">Email atau kata sandi salah. Silakan coba lagi.</p>
+      <p class="form-note">Akun admin dibuat lewat Firebase Console (Authentication → Users), bukan lewat halaman ini. Lihat SETUP.md pada repository untuk caranya.</p>
     </form>
   </div>
 </div>
 
 <!-- ADMIN DASHBOARD -->
+
 <section class="calc-section" id="dashboard" style="display:none; padding-top:32px;">
   <div class="container">
-    <div class="section-head" style="margin-bottom:26px;">
-      <h2>Data Pengajuan Pembiayaan</h2>
-      <p>Daftar seluruh pengajuan pembiayaan yang masuk dari formulir di situs. Klik “Lihat Detail” untuk meninjau dan mengubah status pengajuan.</p>
+    <div class="section-head" style="margin-bottom:26px; display:flex; justify-content:space-between; align-items:flex-end; gap:20px;">
+      <div>
+        <h2>Data Pengajuan Pembiayaan</h2>
+        <p>Daftar seluruh pengajuan pembiayaan yang masuk dari formulir di situs. Klik “Lihat Detail” untuk meninjau dan mengubah status pengajuan.</p>
+      </div>
+      <div style="text-align:right; flex-shrink:0;">
+        <div style="font-size:12.5px; color:var(--ink-soft); margin-bottom:8px;" id="adminEmailLabel"></div>
+        <button type="button" class="btn-secondary" id="logoutBtn">Keluar</button>
+      </div>
     </div>
 
     <div class="stat-cards">
@@ -1126,6 +1142,12 @@
       <div class="detail-item"><div class="k">Pekerjaan</div><div class="v" id="dPekerjaan">-</div></div>
       <div class="detail-item"><div class="k">Penghasilan/bln</div><div class="v" id="dPenghasilan">-</div></div>
       <div class="detail-item full"><div class="k">Nama Usaha/Instansi</div><div class="v" id="dUsaha">-</div></div>
+      <div class="detail-item"><div class="k">Kebutuhan Pokok/bln</div><div class="v" id="dPengPokok">-</div></div>
+      <div class="detail-item"><div class="k">Cicilan Lain/bln</div><div class="v" id="dPengCicilan">-</div></div>
+      <div class="detail-item"><div class="k">Pendidikan Anak/bln</div><div class="v" id="dPengPendidikan">-</div></div>
+      <div class="detail-item"><div class="k">Pengeluaran Lainnya/bln</div><div class="v" id="dPengLainnya">-</div></div>
+      <div class="detail-item"><div class="k">Total Pengeluaran/bln</div><div class="v" id="dPengTotal">-</div></div>
+      <div class="detail-item"><div class="k">Sisa Penghasilan Bersih</div><div class="v" id="dSisaBersih">-</div></div>
       <div class="detail-item"><div class="k">Jenis Pembiayaan</div><div class="v" id="dJenis">-</div></div>
       <div class="detail-item"><div class="k">Jangka Waktu</div><div class="v" id="dJangka">-</div></div>
       <div class="detail-item"><div class="k">Jumlah Diajukan</div><div class="v" id="dJumlah">-</div></div>
@@ -1148,21 +1170,43 @@
 
 <script>
 (function(){
-  const PASSCODE = 'amanah2026';
   const lockScreen = document.getElementById('lockScreen');
   const dashboard = document.getElementById('dashboard');
   const lockForm = document.getElementById('lockForm');
   const lockError = document.getElementById('lockError');
 
-  lockForm.addEventListener('submit', (e) => {
+  lockForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const val = document.getElementById('passcode').value;
-    if(val === PASSCODE){
+    lockError.style.display = 'none';
+    const email = document.getElementById('adminEmail').value.trim();
+    const password = document.getElementById('adminPassword').value;
+    const btn = lockForm.querySelector('.submit-btn');
+    btn.disabled = true; btn.textContent = 'Memeriksa...';
+    try{
+      await auth.signInWithEmailAndPassword(email, password);
+      // onAuthStateChanged below handles showing the dashboard
+    }catch(err){
+      console.error(err);
+      lockError.textContent = 'Email atau kata sandi salah, atau akun belum dibuat di Firebase Console.';
+      lockError.style.display = 'block';
+    }finally{
+      btn.disabled = false; btn.textContent = 'Masuk';
+    }
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    auth.signOut();
+  });
+
+  auth.onAuthStateChanged((user) => {
+    if(user){
       lockScreen.style.display = 'none';
       dashboard.style.display = 'block';
+      document.getElementById('adminEmailLabel').textContent = 'Masuk sebagai ' + user.email;
       loadData();
     } else {
-      lockError.style.display = 'block';
+      lockScreen.style.display = 'block';
+      dashboard.style.display = 'none';
     }
   });
 
@@ -1189,21 +1233,14 @@
     tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--ink-soft); padding:30px;">Memuat data...</td></tr>';
     records = [];
     try{
-      const listResult = await window.storage.list('pengajuan:', true);
-      const keys = (listResult && listResult.keys) ? listResult.keys : [];
-      for(const key of keys){
-        try{
-          const res = await window.storage.get(key, true);
-          if(res && res.value){
-            const parsed = JSON.parse(res.value);
-            parsed._key = key;
-            records.push(parsed);
-          }
-        }catch(e){ /* skip unreadable key */ }
-      }
-      records.sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+      const snapshot = await db.collection(PENGAJUAN_COLLECTION).orderBy('submittedAt', 'desc').get();
+      snapshot.forEach(doc => {
+        records.push({ ...doc.data(), _key: doc.id });
+      });
     }catch(e){
       console.error(e);
+      tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--danger); padding:30px;">Gagal memuat data. Periksa konfigurasi Firebase &amp; koneksi internet Anda.</td></tr>';
+      return;
     }
     renderStats();
     renderTable();
@@ -1282,6 +1319,12 @@
     document.getElementById('dPekerjaan').textContent = r.pekerjaan || '-';
     document.getElementById('dPenghasilan').textContent = fmtRupiah(r.penghasilan);
     document.getElementById('dUsaha').textContent = r.namaUsaha || '-';
+    document.getElementById('dPengPokok').textContent = fmtRupiah(r.pengeluaranPokok);
+    document.getElementById('dPengCicilan').textContent = fmtRupiah(r.pengeluaranCicilan);
+    document.getElementById('dPengPendidikan').textContent = fmtRupiah(r.pengeluaranPendidikan);
+    document.getElementById('dPengLainnya').textContent = fmtRupiah(r.pengeluaranLainnya);
+    document.getElementById('dPengTotal').textContent = fmtRupiah(r.totalPengeluaran);
+    document.getElementById('dSisaBersih').textContent = fmtRupiah(r.sisaPenghasilan);
     document.getElementById('dJenis').textContent = r.jenisPembiayaan || '-';
     document.getElementById('dJangka').textContent = r.jangkaWaktuAjukan || '-';
     document.getElementById('dJumlah').textContent = fmtRupiah(r.jumlahAjukan);
@@ -1302,16 +1345,17 @@
     if(!currentKey) return;
     const r = records.find(x => x._key === currentKey);
     if(!r) return;
-    r.status = document.getElementById('statusSelect').value;
+    const newStatus = document.getElementById('statusSelect').value;
     const btn = document.getElementById('saveStatusBtn');
     btn.disabled = true; btn.textContent = 'Menyimpan...';
     try{
-      const { _key, ...toSave } = r;
-      await window.storage.set(currentKey, JSON.stringify(toSave), true);
+      await db.collection(PENGAJUAN_COLLECTION).doc(currentKey).update({ status: newStatus });
+      r.status = newStatus;
       renderStats();
       renderTable();
       closeModal();
     }catch(e){
+      console.error(e);
       alert('Gagal menyimpan perubahan status.');
     }finally{
       btn.disabled = false; btn.textContent = 'Simpan Status';
@@ -1322,12 +1366,13 @@
     if(!currentKey) return;
     if(!confirm('Hapus pengajuan ini secara permanen?')) return;
     try{
-      await window.storage.delete(currentKey, true);
+      await db.collection(PENGAJUAN_COLLECTION).doc(currentKey).delete();
       records = records.filter(x => x._key !== currentKey);
       renderStats();
       renderTable();
       closeModal();
     }catch(e){
+      console.error(e);
       alert('Gagal menghapus data.');
     }
   });

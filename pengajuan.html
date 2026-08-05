@@ -1013,8 +1013,11 @@
     margin-top:12px;
     width:100%;
   }
-  .btn-danger:hover{ background:var(--danger); color:var(--paper); }
-</style>
+  </style>
+<!-- Firebase (penyimpanan data pengajuan) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
 </head>
 <body>
 
@@ -1140,7 +1143,47 @@
           <input type="text" id="namaUsaha" class="form-input" placeholder="Nama tempat usaha atau instansi bekerja">
         </div>
 
-        <div class="form-section-title">3. Data Pembiayaan yang Diajukan</div>
+        <div class="form-section-title">3. Data Pengeluaran Rutin per Bulan</div>
+        <p class="form-note" style="margin-top:-6px; margin-bottom:16px;">Perkiraan pengeluaran rutin membantu kami menilai kemampuan angsuran Anda secara wajar.</p>
+        <div class="field-row">
+          <div class="field">
+            <label for="pengeluaranPokokText">Kebutuhan Pokok <span class="hint">makan, listrik, air</span></label>
+            <div class="amount-input">
+              <span class="prefix">Rp</span>
+              <input type="text" inputmode="numeric" id="pengeluaranPokokText" class="pengeluaran-input" placeholder="0" required>
+            </div>
+          </div>
+          <div class="field">
+            <label for="pengeluaranCicilanText">Cicilan / Angsuran Lain <span class="hint">jika ada</span></label>
+            <div class="amount-input">
+              <span class="prefix">Rp</span>
+              <input type="text" inputmode="numeric" id="pengeluaranCicilanText" class="pengeluaran-input" placeholder="0">
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label for="pengeluaranPendidikanText">Pendidikan Anak <span class="hint">jika ada</span></label>
+            <div class="amount-input">
+              <span class="prefix">Rp</span>
+              <input type="text" inputmode="numeric" id="pengeluaranPendidikanText" class="pengeluaran-input" placeholder="0">
+            </div>
+          </div>
+          <div class="field">
+            <label for="pengeluaranLainnyaText">Pengeluaran Lainnya</label>
+            <div class="amount-input">
+              <span class="prefix">Rp</span>
+              <input type="text" inputmode="numeric" id="pengeluaranLainnyaText" class="pengeluaran-input" placeholder="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="breakdown-rows" style="background:var(--paper-alt); border-radius:var(--radius-sm); padding:4px 16px; margin-bottom:26px;">
+          <div class="brow"><span class="k">Total pengeluaran per bulan</span><span class="v" id="sumPengeluaran">Rp 0</span></div>
+          <div class="brow total"><span class="k">Estimasi sisa penghasilan bersih</span><span class="v" id="sumSisa">Rp 0</span></div>
+        </div>
+
+        <div class="form-section-title">4. Data Pembiayaan yang Diajukan</div>
         <div class="field-row">
           <div class="field">
             <label for="jenisPembiayaan">Jenis Pembiayaan</label>
@@ -1260,6 +1303,7 @@
   const confirmState = document.getElementById('confirmState');
   const penghasilanText = document.getElementById('penghasilanText');
   const jumlahAjukanText = document.getElementById('jumlahAjukanText');
+  const pengeluaranInputs = document.querySelectorAll('.pengeluaran-input');
 
   function parseNumber(str){
     const digits = String(str).replace(/[^0-9]/g,'');
@@ -1268,10 +1312,21 @@
   function formatWithDots(n){ return n.toLocaleString('id-ID'); }
   function fmtRupiah(n){ return 'Rp ' + Math.round(n).toLocaleString('id-ID'); }
 
-  [penghasilanText, jumlahAjukanText].forEach(el => {
+  function recalcSummary(){
+    const totalPengeluaran = Array.from(pengeluaranInputs).reduce((sum, el) => sum + parseNumber(el.value), 0);
+    const penghasilan = parseNumber(penghasilanText.value);
+    const sisa = penghasilan - totalPengeluaran;
+    document.getElementById('sumPengeluaran').textContent = fmtRupiah(totalPengeluaran);
+    const sisaEl = document.getElementById('sumSisa');
+    sisaEl.textContent = fmtRupiah(sisa);
+    sisaEl.style.color = sisa < 0 ? 'var(--danger)' : '';
+  }
+
+  [penghasilanText, jumlahAjukanText, ...pengeluaranInputs].forEach(el => {
     el.addEventListener('input', () => {
       const v = parseNumber(el.value);
       el.value = v ? formatWithDots(v) : '';
+      recalcSummary();
     });
   });
 
@@ -1306,6 +1361,10 @@
       pekerjaan: document.getElementById('pekerjaan').value,
       penghasilan: parseNumber(penghasilanText.value),
       namaUsaha: document.getElementById('namaUsaha').value.trim(),
+      pengeluaranPokok: parseNumber(document.getElementById('pengeluaranPokokText').value),
+      pengeluaranCicilan: parseNumber(document.getElementById('pengeluaranCicilanText').value),
+      pengeluaranPendidikan: parseNumber(document.getElementById('pengeluaranPendidikanText').value),
+      pengeluaranLainnya: parseNumber(document.getElementById('pengeluaranLainnyaText').value),
       jenisPembiayaan: document.getElementById('jenisPembiayaan').value,
       jangkaWaktuAjukan: document.getElementById('jangkaWaktuAjukan').value,
       jumlahAjukan: parseNumber(jumlahAjukanText.value),
@@ -1313,10 +1372,11 @@
       status: 'Baru',
       submittedAt: new Date().toISOString()
     };
+    data.totalPengeluaran = data.pengeluaranPokok + data.pengeluaranCicilan + data.pengeluaranPendidikan + data.pengeluaranLainnya;
+    data.sisaPenghasilan = data.penghasilan - data.totalPengeluaran;
 
     try{
-      const result = await window.storage.set('pengajuan:' + id, JSON.stringify(data), true);
-      if(!result){ throw new Error('Gagal menyimpan'); }
+      await db.collection(PENGAJUAN_COLLECTION).add(data);
 
       document.getElementById('confirmNama').textContent = data.nama;
       document.getElementById('confirmRef').textContent = ref;
@@ -1329,7 +1389,7 @@
       confirmState.scrollIntoView({ behavior:'smooth', block:'start' });
     }catch(err){
       console.error(err);
-      alert('Maaf, terjadi kendala saat menyimpan pengajuan Anda. Silakan coba lagi.');
+      alert('Maaf, terjadi kendala saat menyimpan pengajuan Anda. Pastikan koneksi internet Anda stabil, lalu coba lagi.');
       submitBtn.disabled = false;
       submitBtn.textContent = 'Kirim Pengajuan';
     }
