@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Admin — KSPPS Amanah Mandiri</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1F2E28;
+    --ink-soft:#4C5C54;
+    --primary:#0B4F45;
+    --primary-light:#146356;
+    --primary-dark:#083B34;
+    --gold:#C79A44;
+    --gold-light:#E4C98A;
+    --gold-deep:#9C7A34;
+    --paper:#FAF6EC;
+    --paper-alt:#F1EADA;
+    --card:#FFFEFB;
+    --line:#DCD2B8;
+    --danger:#9C4A3C;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:8px;
+    --shadow-soft:0 10px 30px -12px rgba(11,79,69,0.18);
+    --shadow-card:0 2px 0 rgba(11,79,69,0.05), 0 18px 40px -20px rgba(31,46,40,0.25);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important;}
+  }
+
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Plus Jakarta Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  h1,h2,h3,.font-display{
+    font-family:'Fraunces', serif;
+    color:var(--primary-dark);
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+
+  .mono{font-family:'JetBrains Mono', monospace;}
+
+  a{color:inherit; text-decoration:none;}
+
+  .container{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 24px;
+  }
+
+  :focus-visible{
+    outline:2.5px solid var(--gold-deep);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  /* ---------- decorative star pattern ---------- */
+  .star-field{
+    background-image: radial-gradient(var(--gold-light) 0.6px, transparent 0.6px),
+      radial-gradient(var(--gold-light) 0.6px, transparent 0.6px);
+    background-size: 46px 46px;
+    background-position: 0 0, 23px 23px;
+  }
+
+  .rosette{
+    position:relative;
+    width:100px; height:100px;
+    flex-shrink:0;
+  }
+  .rosette::before,
+  .rosette::after{
+    content:"";
+    position:absolute;
+    inset:14px;
+    border:1.5px solid var(--gold);
+    opacity:0.9;
+  }
+  .rosette::before{ transform:rotate(0deg); }
+  .rosette::after{ transform:rotate(45deg); }
+
+  /* ---------- header ---------- */
+  .site-header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(250,246,236,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .site-header .bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 24px;
+    gap:20px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-mark{
+    width:42px; height:42px;
+    border-radius:10px;
+    background:linear-gradient(155deg, var(--primary) 0%, var(--primary-dark) 100%);
+    position:relative;
+    flex-shrink:0;
+  }
+  .brand-mark::before,
+  .brand-mark::after{
+    content:"";
+    position:absolute;
+    inset:11px;
+    border:1.3px solid var(--gold-light);
+  }
+  .brand-mark::before{ transform:rotate(0deg); }
+  .brand-mark::after{ transform:rotate(45deg); }
+  .brand-text .name{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:17px;
+    color:var(--primary-dark);
+    line-height:1.15;
+  }
+  .brand-text .tag{
+    font-size:10.5px;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    font-weight:600;
+  }
+  nav.primary-nav{
+    display:flex;
+    gap:28px;
+    font-size:14.5px;
+    font-weight:500;
+    color:var(--ink-soft);
+  }
+  nav.primary-nav a{ position:relative; padding:4px 0; transition:color .2s; }
+  nav.primary-nav a:hover{ color:var(--primary); }
+  nav.primary-nav a.active{ color:var(--primary); }
+  nav.primary-nav a.active::after{
+    content:""; position:absolute; left:0; right:0; bottom:-6px; height:2px;
+    background:var(--gold);
+  }
+  .nav-cta{
+    background:var(--primary);
+    color:var(--paper);
+    padding:10px 18px;
+    border-radius:100px;
+    font-size:13.5px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .nav-toggle{ display:none; }
+
+  @media (max-width: 860px){
+    nav.primary-nav{ display:none; }
+    .nav-cta{ display:none; }
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    overflow:hidden;
+    padding:64px 0 40px;
+  }
+  .hero .container{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:40px;
+  }
+  .hero-copy{ max-width:600px; }
+  .eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    margin-bottom:18px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:16px; height:1.5px;
+    background:var(--gold-deep);
+  }
+  .hero h1{
+    font-size:clamp(30px, 4.4vw, 46px);
+    line-height:1.12;
+    font-weight:600;
+  }
+  .hero h1 em{
+    font-style:italic;
+    color:var(--gold-deep);
+  }
+  .hero p.lead{
+    margin-top:18px;
+    font-size:16.5px;
+    line-height:1.65;
+    color:var(--ink-soft);
+    max-width:520px;
+  }
+  .hero-stats{
+    display:flex;
+    gap:32px;
+    margin-top:34px;
+  }
+  .hero-stats .stat .num{
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    color:var(--primary);
+    font-weight:600;
+  }
+  .hero-stats .stat .lbl{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+  .hero-art{
+    position:relative;
+    width:280px; height:280px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .hero-art .ring{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    border:1px solid var(--line);
+  }
+  .hero-art .ring.r2{ inset:26px; }
+  .hero-art .rosette{ width:150px; height:150px; }
+  .hero-art .rosette::before,
+  .hero-art .rosette::after{ border-color:var(--primary-light); opacity:0.6; }
+  @media (max-width: 900px){
+    .hero-art{ display:none; }
+  }
+
+  /* ---------- section titles ---------- */
+  .section-head{
+    text-align:left;
+    max-width:640px;
+    margin-bottom:36px;
+  }
+  .section-head h2{
+    font-size:clamp(24px, 3vw, 32px);
+    font-weight:600;
+  }
+  .section-head p{
+    margin-top:10px;
+    color:var(--ink-soft);
+    font-size:15px;
+    line-height:1.6;
+  }
+
+  /* ---------- calculator layout ---------- */
+  .calc-section{ padding:20px 0 80px; }
+  .calc-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:28px;
+    align-items:start;
+  }
+  @media (max-width: 940px){
+    .calc-grid{ grid-template-columns:1fr; }
+  }
+
+  /* --- form card --- */
+  .form-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-lg);
+    padding:34px;
+    box-shadow:var(--shadow-card);
+  }
+  .form-card .card-eyebrow{
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--primary);
+    margin-bottom:6px;
+  }
+  .form-card h3{
+    font-size:21px;
+    font-weight:600;
+    margin-bottom:26px;
+  }
+
+  .field{ margin-bottom:26px; }
+  .field label{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:10px;
+  }
+  .field label .hint{
+    font-weight:500;
+    color:var(--ink-soft);
+    font-size:12px;
+  }
+
+  .amount-input{
+    display:flex;
+    align-items:center;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    background:var(--paper);
+    padding:0 4px 0 14px;
+    transition:border-color .2s;
+  }
+  .amount-input:focus-within{ border-color:var(--primary); }
+  .amount-input .prefix{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px;
+    color:var(--gold-deep);
+    font-weight:600;
+    margin-right:8px;
+  }
+  .amount-input input{
+    border:none;
+    background:transparent;
+    outline:none;
+    font-family:'JetBrains Mono', monospace;
+    font-size:16px;
+    font-weight:600;
+    color:var(--ink);
+    padding:13px 6px;
+    width:100%;
+    min-width:0;
+  }
+  .amount-input .suffix{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    padding-right:10px;
+    white-space:nowrap;
+  }
+
+  input[type="range"]{
+    -webkit-appearance:none;
+    appearance:none;
+    width:100%;
+    height:5px;
+    border-radius:4px;
+    background:linear-gradient(to right, var(--primary) 0%, var(--primary) var(--fill,50%), var(--line) var(--fill,50%), var(--line) 100%);
+    margin-top:14px;
+    cursor:pointer;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:var(--card);
+    border:3px solid var(--primary);
+    cursor:pointer;
+    box-shadow:0 2px 6px rgba(11,79,69,0.3);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:18px; height:18px;
+    border-radius:50%;
+    background:var(--card);
+    border:3px solid var(--primary);
+    cursor:pointer;
+  }
+  input[type="range"]::-moz-range-track{
+    height:5px; border-radius:4px; background:var(--line);
+  }
+
+  .scale-labels{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    font-family:'JetBrains Mono', monospace;
+  }
+
+  .method-pills{
+    display:flex;
+    gap:8px;
+    background:var(--paper-alt);
+    padding:5px;
+    border-radius:100px;
+  }
+  .method-pills button{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding:10px 12px;
+    border-radius:100px;
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .2s;
+  }
+  .method-pills button.active{
+    background:var(--primary);
+    color:var(--paper);
+    box-shadow:0 4px 10px -4px rgba(11,79,69,0.5);
+  }
+
+  .submit-btn{
+    width:100%;
+    background:var(--gold-deep);
+    color:var(--paper);
+    border:none;
+    padding:16px;
+    border-radius:var(--radius-sm);
+    font-family:inherit;
+    font-size:15px;
+    font-weight:700;
+    letter-spacing:0.01em;
+    cursor:pointer;
+    margin-top:6px;
+    transition:transform .15s ease, background .2s;
+  }
+  .submit-btn:hover{ background:var(--primary-dark); transform:translateY(-1px); }
+  .submit-btn:active{ transform:translateY(0); }
+
+  .form-note{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:14px;
+    line-height:1.5;
+  }
+
+  /* --- passbook result card --- */
+  .passbook-wrap{ position:sticky; top:96px; }
+  .passbook{
+    position:relative;
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-card);
+    padding:34px 34px 30px 40px;
+    overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .passbook::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width:16px;
+    background-image: radial-gradient(circle, var(--paper) 3.4px, transparent 3.6px);
+    background-size:16px 22px;
+    background-position:0 10px;
+    background-repeat:repeat-y;
+  }
+  .passbook::after{
+    content:"";
+    position:absolute;
+    left:16px; top:0; bottom:0;
+    width:1px;
+    background:repeating-linear-gradient(to bottom, var(--line) 0 6px, transparent 6px 12px);
+  }
+
+  .passbook-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:22px;
+    padding-bottom:18px;
+    border-bottom:1px dashed var(--line);
+  }
+  .passbook-head .label{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:var(--primary);
+    margin-bottom:4px;
+  }
+  .passbook-head h3{
+    font-size:19px; font-weight:600;
+  }
+  .stamp{
+    width:88px; height:88px;
+    border:2px dashed var(--gold);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transform:rotate(-11deg);
+    flex-shrink:0;
+  }
+  .stamp span{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    text-align:center;
+    line-height:1.4;
+  }
+
+  .headline-figure{
+    text-align:left;
+    margin-bottom:26px;
+  }
+  .headline-figure .lbl{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
+  .headline-figure .amount{
+    font-family:'Fraunces', serif;
+    font-size:clamp(30px, 4vw, 40px);
+    font-weight:600;
+    color:var(--primary-dark);
+    line-height:1.1;
+  }
+  .headline-figure .amount .per{
+    font-family:'Plus Jakarta Sans', sans-serif;
+    font-size:14px;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+
+  .breakdown-rows{
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    margin-bottom:20px;
+  }
+  .brow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:13px 0;
+    border-bottom:1px dotted var(--line);
+    font-size:14px;
+  }
+  .brow:last-child{ border-bottom:none; }
+  .brow .k{ color:var(--ink-soft); }
+  .brow .v{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .brow.total .k{ color:var(--primary-dark); font-weight:700; }
+  .brow.total .v{ color:var(--primary-dark); font-weight:700; font-size:15px; }
+
+  .toggle-table-btn{
+    width:100%;
+    background:var(--paper-alt);
+    border:1px solid var(--line);
+    color:var(--primary-dark);
+    font-family:inherit;
+    font-weight:600;
+    font-size:13.5px;
+    padding:12px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:background .2s;
+  }
+  .toggle-table-btn:hover{ background:var(--line); }
+  .toggle-table-btn .chev{ transition:transform .25s; font-size:11px; }
+  .toggle-table-btn.open .chev{ transform:rotate(180deg); }
+
+  .empty-state{
+    text-align:center;
+    padding:30px 10px 10px;
+    color:var(--ink-soft);
+    font-size:13.5px;
+  }
+  .empty-state .rosette{
+    width:56px; height:56px;
+    margin:0 auto 16px;
+    opacity:0.5;
+  }
+
+  /* --- schedule table --- */
+  .schedule-wrap{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+  }
+  .schedule-wrap.open{ max-height:420px; }
+  .schedule-scroll{
+    max-height:400px;
+    overflow-y:auto;
+    margin-top:14px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-sm);
+  }
+  table.schedule{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12.5px;
+  }
+  table.schedule thead th{
+    position:sticky; top:0;
+    background:var(--primary);
+    color:var(--paper);
+    text-align:right;
+    padding:10px 12px;
+    font-weight:600;
+    font-size:11px;
+    letter-spacing:0.03em;
+    text-transform:uppercase;
+  }
+  table.schedule thead th:first-child{ text-align:left; }
+  table.schedule td{
+    padding:9px 12px;
+    text-align:right;
+    font-family:'JetBrains Mono', monospace;
+    border-bottom:1px solid var(--paper-alt);
+    color:var(--ink);
+  }
+  table.schedule td:first-child{
+    text-align:left;
+    font-family:'Plus Jakarta Sans', sans-serif;
+    font-weight:600;
+    color:var(--ink-soft);
+  }
+  table.schedule tbody tr:nth-child(even){ background:var(--paper); }
+
+  /* ---------- info strip ---------- */
+  .info-strip{
+    background:var(--primary);
+    color:var(--paper);
+    padding:56px 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .info-strip::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: radial-gradient(rgba(228,201,138,0.18) 1px, transparent 1px);
+    background-size:28px 28px;
+  }
+  .info-strip .container{
+    position:relative;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:32px;
+  }
+  @media (max-width:800px){
+    .info-strip .container{ grid-template-columns:1fr; }
+  }
+  .info-card .n{
+    font-family:'Fraunces', serif;
+    font-size:15px;
+    color:var(--gold-light);
+    margin-bottom:10px;
+  }
+  .info-card h4{
+    font-family:'Fraunces', serif;
+    font-size:19px;
+    font-weight:600;
+    margin-bottom:10px;
+    color:var(--paper);
+  }
+  .info-card p{
+    font-size:14px;
+    line-height:1.65;
+    color:rgba(250,246,236,0.8);
+  }
+
+  /* ---------- disclaimer ---------- */
+  .disclaimer{
+    padding:40px 0;
+  }
+  .disclaimer .box{
+    border:1px dashed var(--gold-deep);
+    border-radius:var(--radius-md);
+    padding:20px 24px;
+    background:var(--paper-alt);
+    font-size:13px;
+    line-height:1.6;
+    color:var(--ink-soft);
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .disclaimer .box b{ color:var(--ink); }
+  .disclaimer .icon{
+    flex-shrink:0;
+    width:26px; height:26px;
+    border-radius:50%;
+    border:1.5px solid var(--gold-deep);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-weight:700;
+    color:var(--gold-deep);
+    font-size:14px;
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    background:var(--primary-dark);
+    color:rgba(250,246,236,0.75);
+    padding:56px 0 26px;
+  }
+  .footer-grid{
+    display:grid;
+    grid-template-columns:1.4fr 1fr 1fr;
+    gap:40px;
+    padding-bottom:36px;
+    border-bottom:1px solid rgba(250,246,236,0.12);
+  }
+  @media (max-width:800px){
+    .footer-grid{ grid-template-columns:1fr; gap:28px; }
+  }
+  .footer-brand .brand-text .name{ color:var(--paper); }
+  .footer-brand p{
+    font-size:13.5px; line-height:1.7; margin-top:14px; max-width:320px;
+    color:rgba(250,246,236,0.65);
+  }
+  footer h5{
+    font-family:'Fraunces', serif;
+    font-size:14px;
+    color:var(--gold-light);
+    margin-bottom:16px;
+    font-weight:600;
+  }
+  footer ul{ list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:11px; }
+  footer ul a{ font-size:13.5px; color:rgba(250,246,236,0.72); transition:color .2s; }
+  footer ul a:hover{ color:var(--gold-light); }
+  .footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding-top:22px;
+    font-size:12px;
+    color:rgba(250,246,236,0.5);
+    flex-wrap:wrap;
+    gap:10px;
+  }
+
+  ::selection{ background:var(--gold-light); color:var(--primary-dark); }
+
+  /* ---------- generic form fields (pengajuan & admin) ---------- */
+  .field-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+  }
+  @media (max-width:640px){
+    .field-row{ grid-template-columns:1fr; }
+  }
+  .form-input, .form-select, .form-textarea{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:var(--radius-sm);
+    background:var(--paper);
+    padding:13px 14px;
+    font-family:'Plus Jakarta Sans', sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    outline:none;
+    transition:border-color .2s;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus{ border-color:var(--primary); }
+  .form-textarea{ resize:vertical; min-height:96px; font-family:inherit; }
+  .form-select{ appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%234C5C54' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:36px; }
+
+  .form-section-title{
+    font-family:'Fraunces', serif;
+    font-size:15.5px;
+    font-weight:600;
+    color:var(--primary-dark);
+    margin:0 0 16px;
+    padding-top:24px;
+    border-top:1px dashed var(--line);
+  }
+  .form-section-title.first{ padding-top:0; border-top:none; }
+
+  .checkbox-line{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+    margin-top:22px;
+  }
+  .checkbox-line input{ margin-top:3px; accent-color:var(--primary); flex-shrink:0; }
+
+  /* ---------- status badges ---------- */
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 12px;
+    border-radius:100px;
+    font-size:11.5px;
+    font-weight:700;
+    letter-spacing:0.02em;
+    white-space:nowrap;
+  }
+  .badge::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+  .badge.badge-baru{ background:#EAF0EE; color:var(--primary); }
+  .badge.badge-diproses{ background:#FBF1DE; color:var(--gold-deep); }
+  .badge.badge-disetujui{ background:#E4F3E9; color:#1E7A4C; }
+  .badge.badge-ditolak{ background:#F7E7E3; color:var(--danger); }
+
+  /* ---------- confirmation passbook ---------- */
+  .confirm-wrap{ max-width:560px; margin:0 auto; }
+  .ref-number{
+    font-family:'JetBrains Mono', monospace;
+    font-size:26px;
+    font-weight:600;
+    color:var(--primary-dark);
+    letter-spacing:0.02em;
+  }
+  .confirm-icon{
+    width:64px; height:64px;
+    border-radius:50%;
+    background:var(--primary);
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:28px;
+    margin:0 auto 20px;
+  }
+
+  /* ---------- admin panel ---------- */
+  .admin-lock{
+    max-width:420px;
+    margin:80px auto;
+    text-align:center;
+  }
+  .stat-cards{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:16px;
+    margin-bottom:32px;
+  }
+  @media (max-width:900px){
+    .stat-cards{ grid-template-columns:repeat(2, 1fr); }
+  }
+  .stat-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius-md);
+    padding:18px 20px;
+    box-shadow:var(--shadow-card);
+  }
+  .stat-card .num{
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    font-weight:600;
+    color:var(--primary-dark);
+  }
+  .stat-card .lbl{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-top:2px;
+  }
+
+  .admin-toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+  }
+  .admin-toolbar .form-select{ width:auto; min-width:170px; }
+  .admin-toolbar .form-input{ width:auto; min-width:220px; }
+
+  table.admin-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+    background:var(--card);
+  }
+  table.admin-table thead th{
+    background:var(--primary);
+    color:var(--paper);
+    text-align:left;
+    padding:13px 16px;
+    font-weight:600;
+    font-size:11px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  table.admin-table td{
+    padding:13px 16px;
+    border-bottom:1px solid var(--paper-alt);
+    color:var(--ink);
+    vertical-align:middle;
+  }
+  table.admin-table tbody tr:hover{ background:var(--paper); }
+  table.admin-table .lihat-btn{
+    border:1.5px solid var(--primary);
+    background:transparent;
+    color:var(--primary);
+    font-family:inherit;
+    font-weight:600;
+    font-size:12px;
+    padding:7px 14px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:all .2s;
+  }
+  table.admin-table .lihat-btn:hover{ background:var(--primary); color:var(--paper); }
+
+  .admin-empty{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+  }
+  .admin-empty .rosette{ margin:0 auto 18px; opacity:0.5; }
+
+  /* ---------- modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0;
+    background:rgba(31,46,40,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+    padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal-box{
+    background:var(--card);
+    border-radius:var(--radius-lg);
+    max-width:560px;
+    width:100%;
+    max-height:86vh;
+    overflow-y:auto;
+    padding:32px;
+    position:relative;
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.4);
+  }
+  .modal-close{
+    position:absolute; top:20px; right:20px;
+    width:32px; height:32px;
+    border-radius:50%;
+    border:1px solid var(--line);
+    background:var(--paper);
+    cursor:pointer;
+    font-size:16px;
+    color:var(--ink-soft);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .modal-close:hover{ background:var(--paper-alt); }
+  .modal-box h3{ font-size:20px; font-weight:600; margin-bottom:4px; }
+  .modal-sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:20px; }
+  .detail-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px 20px;
+    margin-bottom:22px;
+  }
+  @media (max-width:520px){ .detail-grid{ grid-template-columns:1fr; } }
+  .detail-item .k{ font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-soft); margin-bottom:4px; }
+  .detail-item .v{ font-size:14px; font-weight:600; color:var(--ink); }
+  .detail-item.full{ grid-column:1 / -1; }
+
+  .status-update-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    padding-top:18px;
+    border-top:1px dashed var(--line);
+  }
+  .status-update-row .form-select{ flex:1; }
+  .btn-secondary{
+    border:1.5px solid var(--line);
+    background:var(--paper);
+    color:var(--ink-soft);
+    font-family:inherit;
+    font-weight:600;
+    font-size:13px;
+    padding:11px 16px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+  }
+  .btn-secondary:hover{ background:var(--paper-alt); }
+  .btn-danger{
+    border:1.5px solid var(--danger);
+    background:transparent;
+    color:var(--danger);
+    font-family:inherit;
+    font-weight:600;
+    font-size:12.5px;
+    padding:10px 14px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+    margin-top:12px;
+    width:100%;
+  }
+  .btn-danger:hover{ background:var(--danger); color:var(--paper); }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="bar container">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div class="brand-text">
+        <div class="name">Amanah Mandiri</div>
+        <div class="tag">Panel Admin</div>
+      </div>
+    </div>
+    <nav class="primary-nav" aria-label="Navigasi utama">
+      <a href="index.html">Beranda</a>
+      <a href="simpanan.html">Simpanan</a>
+      <a href="pengajuan.html">Pengajuan Pembiayaan</a>
+      <a href="admin.html" class="active">Admin</a>
+    </nav>
+    <a href="index.html" class="nav-cta">Ke Situs Utama</a>
+  </div>
+</header>
+
+<!-- LOCK SCREEN -->
+<div class="container" id="lockScreen">
+  <div class="form-card admin-lock">
+    <div class="card-eyebrow">Akses Terbatas</div>
+    <h3 style="margin-bottom:18px;">Masuk ke Panel Admin</h3>
+    <form id="lockForm">
+      <div class="field" style="text-align:left;">
+        <label for="passcode">Kode Akses</label>
+        <input type="password" id="passcode" class="form-input" placeholder="Masukkan kode akses admin" required>
+      </div>
+      <button type="submit" class="submit-btn">Masuk</button>
+      <p class="form-note" id="lockError" style="color:var(--danger); display:none;">Kode akses salah. Silakan coba lagi.</p>
+      <p class="form-note">Demo: kode akses default adalah <b>amanah2026</b>. Ganti mekanisme ini dengan autentikasi sungguhan sebelum dipakai secara produksi.</p>
+    </form>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<section class="calc-section" id="dashboard" style="display:none; padding-top:32px;">
+  <div class="container">
+    <div class="section-head" style="margin-bottom:26px;">
+      <h2>Data Pengajuan Pembiayaan</h2>
+      <p>Daftar seluruh pengajuan pembiayaan yang masuk dari formulir di situs. Klik “Lihat Detail” untuk meninjau dan mengubah status pengajuan.</p>
+    </div>
+
+    <div class="stat-cards">
+      <div class="stat-card"><div class="num" id="statTotal">0</div><div class="lbl">Total Pengajuan</div></div>
+      <div class="stat-card"><div class="num" id="statBaru">0</div><div class="lbl">Baru</div></div>
+      <div class="stat-card"><div class="num" id="statDiproses">0</div><div class="lbl">Diproses</div></div>
+      <div class="stat-card"><div class="num" id="statDisetujui">0</div><div class="lbl">Disetujui</div></div>
+      <div class="stat-card"><div class="num" id="statDitolak">0</div><div class="lbl">Ditolak</div></div>
+    </div>
+
+    <div class="admin-toolbar">
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input type="text" id="searchInput" class="form-input" placeholder="Cari nama, NIK, atau nomor referensi...">
+        <select id="filterStatus" class="form-select">
+          <option value="">Semua Status</option>
+          <option value="Baru">Baru</option>
+          <option value="Diproses">Diproses</option>
+          <option value="Disetujui">Disetujui</option>
+          <option value="Ditolak">Ditolak</option>
+        </select>
+      </div>
+      <button type="button" class="btn-secondary" id="refreshBtn">↻ Muat Ulang</button>
+    </div>
+
+    <div class="compare-wrap" id="tableWrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Nama</th>
+            <th>Jenis Pembiayaan</th>
+            <th>Jumlah</th>
+            <th>Jangka</th>
+            <th>Tanggal</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="admin-empty" id="emptyState" style="display:none;">
+        <div class="rosette"></div>
+        Belum ada pengajuan pembiayaan yang masuk.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <button type="button" class="modal-close" id="modalClose">✕</button>
+    <h3 id="modalNama">-</h3>
+    <div class="modal-sub" id="modalSub">-</div>
+
+    <div class="detail-grid">
+      <div class="detail-item"><div class="k">NIK</div><div class="v" id="dNik">-</div></div>
+      <div class="detail-item"><div class="k">Tanggal Lahir</div><div class="v" id="dTtl">-</div></div>
+      <div class="detail-item"><div class="k">Jenis Kelamin</div><div class="v" id="dGender">-</div></div>
+      <div class="detail-item"><div class="k">Status Nikah</div><div class="v" id="dNikah">-</div></div>
+      <div class="detail-item full"><div class="k">Alamat</div><div class="v" id="dAlamat">-</div></div>
+      <div class="detail-item"><div class="k">No HP</div><div class="v" id="dHp">-</div></div>
+      <div class="detail-item"><div class="k">Email</div><div class="v" id="dEmail">-</div></div>
+      <div class="detail-item"><div class="k">Pekerjaan</div><div class="v" id="dPekerjaan">-</div></div>
+      <div class="detail-item"><div class="k">Penghasilan/bln</div><div class="v" id="dPenghasilan">-</div></div>
+      <div class="detail-item full"><div class="k">Nama Usaha/Instansi</div><div class="v" id="dUsaha">-</div></div>
+      <div class="detail-item"><div class="k">Jenis Pembiayaan</div><div class="v" id="dJenis">-</div></div>
+      <div class="detail-item"><div class="k">Jangka Waktu</div><div class="v" id="dJangka">-</div></div>
+      <div class="detail-item"><div class="k">Jumlah Diajukan</div><div class="v" id="dJumlah">-</div></div>
+      <div class="detail-item"><div class="k">Diajukan Pada</div><div class="v" id="dTanggal">-</div></div>
+      <div class="detail-item full"><div class="k">Tujuan Penggunaan Dana</div><div class="v" id="dTujuan">-</div></div>
+    </div>
+
+    <div class="status-update-row">
+      <select class="form-select" id="statusSelect">
+        <option value="Baru">Baru</option>
+        <option value="Diproses">Diproses</option>
+        <option value="Disetujui">Disetujui</option>
+        <option value="Ditolak">Ditolak</option>
+      </select>
+      <button type="button" class="submit-btn" id="saveStatusBtn" style="margin-top:0; width:auto; padding:12px 22px;">Simpan Status</button>
+    </div>
+    <button type="button" class="btn-danger" id="deleteBtn">Hapus Pengajuan Ini</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const PASSCODE = 'amanah2026';
+  const lockScreen = document.getElementById('lockScreen');
+  const dashboard = document.getElementById('dashboard');
+  const lockForm = document.getElementById('lockForm');
+  const lockError = document.getElementById('lockError');
+
+  lockForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const val = document.getElementById('passcode').value;
+    if(val === PASSCODE){
+      lockScreen.style.display = 'none';
+      dashboard.style.display = 'block';
+      loadData();
+    } else {
+      lockError.style.display = 'block';
+    }
+  });
+
+  let records = [];
+
+  function fmtRupiah(n){ return 'Rp ' + Math.round(n||0).toLocaleString('id-ID'); }
+  function fmtTanggal(iso){
+    if(!iso) return '-';
+    const d = new Date(iso);
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' }) +
+      ' ' + d.toLocaleTimeString('id-ID', { hour:'2-digit', minute:'2-digit' });
+  }
+  function badgeClass(status){
+    return {
+      'Baru':'badge-baru',
+      'Diproses':'badge-diproses',
+      'Disetujui':'badge-disetujui',
+      'Ditolak':'badge-ditolak'
+    }[status] || 'badge-baru';
+  }
+
+  async function loadData(){
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--ink-soft); padding:30px;">Memuat data...</td></tr>';
+    records = [];
+    try{
+      const listResult = await window.storage.list('pengajuan:', true);
+      const keys = (listResult && listResult.keys) ? listResult.keys : [];
+      for(const key of keys){
+        try{
+          const res = await window.storage.get(key, true);
+          if(res && res.value){
+            const parsed = JSON.parse(res.value);
+            parsed._key = key;
+            records.push(parsed);
+          }
+        }catch(e){ /* skip unreadable key */ }
+      }
+      records.sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+    }catch(e){
+      console.error(e);
+    }
+    renderStats();
+    renderTable();
+  }
+
+  function renderStats(){
+    document.getElementById('statTotal').textContent = records.length;
+    document.getElementById('statBaru').textContent = records.filter(r => r.status === 'Baru').length;
+    document.getElementById('statDiproses').textContent = records.filter(r => r.status === 'Diproses').length;
+    document.getElementById('statDisetujui').textContent = records.filter(r => r.status === 'Disetujui').length;
+    document.getElementById('statDitolak').textContent = records.filter(r => r.status === 'Ditolak').length;
+  }
+
+  function renderTable(){
+    const tableBody = document.getElementById('tableBody');
+    const emptyState = document.getElementById('emptyState');
+    const search = document.getElementById('searchInput').value.trim().toLowerCase();
+    const statusFilter = document.getElementById('filterStatus').value;
+
+    let filtered = records.filter(r => {
+      const matchSearch = !search ||
+        (r.nama||'').toLowerCase().includes(search) ||
+        (r.nik||'').toLowerCase().includes(search) ||
+        (r.ref||'').toLowerCase().includes(search);
+      const matchStatus = !statusFilter || r.status === statusFilter;
+      return matchSearch && matchStatus;
+    });
+
+    if(filtered.length === 0){
+      tableBody.innerHTML = '';
+      emptyState.style.display = 'block';
+      return;
+    }
+    emptyState.style.display = 'none';
+
+    tableBody.innerHTML = filtered.map(r => `
+      <tr>
+        <td style="font-family:'JetBrains Mono',monospace; font-weight:600;">${r.ref || '-'}</td>
+        <td style="font-weight:600;">${r.nama || '-'}</td>
+        <td>${r.jenisPembiayaan || '-'}</td>
+        <td style="font-family:'JetBrains Mono',monospace;">${fmtRupiah(r.jumlahAjukan)}</td>
+        <td>${r.jangkaWaktuAjukan || '-'}</td>
+        <td style="white-space:nowrap;">${fmtTanggal(r.submittedAt)}</td>
+        <td><span class="badge ${badgeClass(r.status)}">${r.status || 'Baru'}</span></td>
+        <td><button type="button" class="lihat-btn" data-key="${r._key}">Lihat Detail</button></td>
+      </tr>
+    `).join('');
+
+    tableBody.querySelectorAll('.lihat-btn').forEach(btn => {
+      btn.addEventListener('click', () => openModal(btn.dataset.key));
+    });
+  }
+
+  document.getElementById('searchInput').addEventListener('input', renderTable);
+  document.getElementById('filterStatus').addEventListener('change', renderTable);
+  document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+  // ---- modal ----
+  const modalOverlay = document.getElementById('modalOverlay');
+  let currentKey = null;
+
+  function openModal(key){
+    const r = records.find(x => x._key === key);
+    if(!r) return;
+    currentKey = key;
+
+    document.getElementById('modalNama').textContent = r.nama || '-';
+    document.getElementById('modalSub').textContent = (r.ref || '-') + ' · Diajukan ' + fmtTanggal(r.submittedAt);
+    document.getElementById('dNik').textContent = r.nik || '-';
+    document.getElementById('dTtl').textContent = (r.tempatLahir || '-') + ', ' + (r.tanggalLahir || '-');
+    document.getElementById('dGender').textContent = r.jenisKelamin || '-';
+    document.getElementById('dNikah').textContent = r.statusNikah || '-';
+    document.getElementById('dAlamat').textContent = r.alamat || '-';
+    document.getElementById('dHp').textContent = r.noHp || '-';
+    document.getElementById('dEmail').textContent = r.email || '-';
+    document.getElementById('dPekerjaan').textContent = r.pekerjaan || '-';
+    document.getElementById('dPenghasilan').textContent = fmtRupiah(r.penghasilan);
+    document.getElementById('dUsaha').textContent = r.namaUsaha || '-';
+    document.getElementById('dJenis').textContent = r.jenisPembiayaan || '-';
+    document.getElementById('dJangka').textContent = r.jangkaWaktuAjukan || '-';
+    document.getElementById('dJumlah').textContent = fmtRupiah(r.jumlahAjukan);
+    document.getElementById('dTanggal').textContent = fmtTanggal(r.submittedAt);
+    document.getElementById('dTujuan').textContent = r.tujuan || '-';
+    document.getElementById('statusSelect').value = r.status || 'Baru';
+
+    modalOverlay.classList.add('open');
+  }
+  function closeModal(){
+    modalOverlay.classList.remove('open');
+    currentKey = null;
+  }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', (e) => { if(e.target === modalOverlay) closeModal(); });
+
+  document.getElementById('saveStatusBtn').addEventListener('click', async () => {
+    if(!currentKey) return;
+    const r = records.find(x => x._key === currentKey);
+    if(!r) return;
+    r.status = document.getElementById('statusSelect').value;
+    const btn = document.getElementById('saveStatusBtn');
+    btn.disabled = true; btn.textContent = 'Menyimpan...';
+    try{
+      const { _key, ...toSave } = r;
+      await window.storage.set(currentKey, JSON.stringify(toSave), true);
+      renderStats();
+      renderTable();
+      closeModal();
+    }catch(e){
+      alert('Gagal menyimpan perubahan status.');
+    }finally{
+      btn.disabled = false; btn.textContent = 'Simpan Status';
+    }
+  });
+
+  document.getElementById('deleteBtn').addEventListener('click', async () => {
+    if(!currentKey) return;
+    if(!confirm('Hapus pengajuan ini secara permanen?')) return;
+    try{
+      await window.storage.delete(currentKey, true);
+      records = records.filter(x => x._key !== currentKey);
+      renderStats();
+      renderTable();
+      closeModal();
+    }catch(e){
+      alert('Gagal menghapus data.');
+    }
+  });
+})();
+</script>
+
+</body>
+</html>
