@@ -825,29 +825,29 @@
 
         <form id="calcForm">
           <div class="field">
-            <label for="jumlah">Jumlah Pembiayaan <span class="hint">Rp 1.000.000 – Rp 500.000.000</span></label>
+            <label for="jumlah">Jumlah Pembiayaan <span class="hint">Rp 500.000 – Rp 100.000.000</span></label>
             <div class="amount-input">
               <span class="prefix">Rp</span>
-              <input type="text" inputmode="numeric" id="jumlahText" value="50.000.000" aria-label="Jumlah pembiayaan dalam rupiah">
+              <input type="text" inputmode="numeric" id="jumlahText" value="10.000.000" aria-label="Jumlah pembiayaan dalam rupiah">
             </div>
-            <input type="range" id="jumlahRange" min="1000000" max="500000000" step="500000" value="50000000">
-            <div class="scale-labels"><span>1jt</span><span>500jt</span></div>
+            <input type="range" id="jumlahRange" min="500000" max="100000000" step="100000" value="10000000">
+            <div class="scale-labels"><span>500rb</span><span>100jt</span></div>
           </div>
 
           <div class="field">
-            <label for="jangkaText">Jangka Waktu <span class="hint">3 – 60 bulan</span></label>
+            <label for="jangkaText">Jangka Waktu <span class="hint">3 – 36 bulan</span></label>
             <div class="amount-input">
               <input type="text" inputmode="numeric" id="jangkaText" value="12" aria-label="Jangka waktu dalam bulan">
               <span class="suffix">bulan</span>
             </div>
-            <input type="range" id="jangkaRange" min="3" max="60" step="1" value="12">
-            <div class="scale-labels"><span>3 bln</span><span>60 bln</span></div>
+            <input type="range" id="jangkaRange" min="3" max="36" step="1" value="12">
+            <div class="scale-labels"><span>3 bln</span><span>36 bln</span></div>
           </div>
 
           <div class="field">
             <label for="marginText">Margin / Nisbah Setara <span class="hint">per tahun</span></label>
             <div class="amount-input">
-              <input type="text" inputmode="decimal" id="marginText" value="14" aria-label="Margin per tahun dalam persen">
+              <input type="text" inputmode="decimal" id="marginText" value="18" aria-label="Margin per tahun dalam persen">
               <span class="suffix">% / tahun</span>
             </div>
             <input type="range" id="marginRange" min="6" max="30" step="0.5" value="14">
